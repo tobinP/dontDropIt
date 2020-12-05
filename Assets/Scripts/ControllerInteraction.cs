@@ -7,47 +7,57 @@ using WebXR;
 [RequireComponent(typeof(WebXRController))]
 public class ControllerInteraction : MonoBehaviour
 {
-	public LineMaker lineMaker;
-	private FixedJoint attachJoint;
+	public int launchForce = 400;
 	private Rigidbody currentRigidBody;
 	private List<Rigidbody> contactRigidBodies = new List<Rigidbody>();
-	private WebXRController controller;
 	private Vector3 lastPosition;
 	private Quaternion lastRotation;
+	private FixedJoint attachJoint;
 	private Animator animator;
+	private WebXRController controller;
+	private Beam beam;
 
 	void Awake()
 	{
 		attachJoint = GetComponent<FixedJoint>();
 		animator = GetComponent<Animator>();
 		controller = GetComponent<WebXRController>();
+		beam = GetComponent<Beam>();
 	}
 
 	void Update()
 	{
+		if (currentRigidBody && controller.GetButtonDown(C.grip))
+		{
+			Drop();
+			currentRigidBody.AddForce(transform.forward.normalized * launchForce);
+			currentRigidBody = null;
+		}
 
-		if (controller.GetButtonDown("Trigger"))
+		if (controller.GetButtonDown(C.trigger))
 			Pickup();
 
-		if (controller.GetButtonUp("Trigger"))
-			Drop();
-
-		if (lineMaker != null)
+		if (controller.GetButtonUp(C.trigger))
 		{
-			if (controller.GetButtonDown("Grip"))
+			Drop();
+			currentRigidBody = null;
+		}
+
+		if (beam != null)
+		{
+			if (controller.GetButtonDown(C.grip))
 			{
-				// lineMaker.DrawLine();
-				lineMaker.buttonDown = true;
+				beam.on = true;
 			}
 
-			if (controller.GetButtonUp("Grip"))
+			if (controller.GetButtonUp(C.grip))
 			{
-				lineMaker.PullObject();
+				beam.PullObject();
 			}
 		}
 
 		// Use the controller button or axis position to manipulate the playback time for hand model.
-		var normalizedTime = controller.GetButton("Trigger") ? 1 : controller.GetAxis("Grip");
+		var normalizedTime = controller.GetButton(C.trigger) ? 1 : controller.GetAxis(C.grip);
 		animator.Play("Take", -1, normalizedTime);
 	}
 
@@ -61,7 +71,7 @@ public class ControllerInteraction : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		if (!other.gameObject.CompareTag("Interactable"))
+		if (!other.gameObject.CompareTag(C.interactable))
 			return;
 
 		contactRigidBodies.Add(other.attachedRigidbody);
@@ -69,7 +79,7 @@ public class ControllerInteraction : MonoBehaviour
 
 	void OnTriggerExit(Collider other)
 	{
-		if (!other.gameObject.CompareTag("Interactable"))
+		if (!other.gameObject.CompareTag(C.interactable))
 			return;
 
 		contactRigidBodies.Remove(other.attachedRigidbody);
@@ -104,8 +114,6 @@ public class ControllerInteraction : MonoBehaviour
 		deltaRotation.ToAngleAxis(out angle, out axis);
 		angle *= Mathf.Deg2Rad;
 		currentRigidBody.angularVelocity = axis * angle / Time.deltaTime;
-
-		currentRigidBody = null;
 	}
 
 	private Rigidbody GetNearestRigidBody()

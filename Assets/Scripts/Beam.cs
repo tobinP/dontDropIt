@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LineMaker : MonoBehaviour
+public class Beam : MonoBehaviour
 {
-	public bool buttonDown = false;
+	public bool on = false;
 	private LineRenderer lineRenderer;
 	private Renderer otherRenderer;
 
@@ -19,32 +19,21 @@ public class LineMaker : MonoBehaviour
 	{
 		lineRenderer.SetPosition(0, transform.position);
 
-		if (buttonDown)
+		if (on)
 		{
-			DrawLine();
+			EmitBeam();
 		}
 	}
 
-	void OnMouseDown()
-	{
-		DrawLine();
-	}
-
-	void OnMouseUp()
-	{
-		PullObject();
-	}
-
-	public void DrawLine()
+	public void EmitBeam()
 	{
 		lineRenderer.forceRenderingOff = false;
 		if (Physics.Raycast(transform.position, transform.forward, out var hit))
 		{
 			lineRenderer.SetPosition(1, hit.point);
-			if (hit.transform.CompareTag("Interactable"))
+			if (hit.transform.CompareTag(C.interactable))
 			{
-				Debug.Log("&&& CompareTag");
-				hit.collider.SendMessage("TurnOnHighlight");
+				hit.collider.SendMessage(C.turnOnHighlight);
 			}
 		}
 	}
@@ -52,12 +41,12 @@ public class LineMaker : MonoBehaviour
 	public void PullObject()
 	{
 		lineRenderer.forceRenderingOff = true;
-		buttonDown = false;
+		on = false;
 		if (Physics.Raycast(transform.position, transform.forward, out var hit))
 		{
-			if (hit.transform.CompareTag("Interactable"))
+			if (hit.transform.CompareTag(C.interactable))
 			{
-				hit.collider.SendMessage("GetOverHere", transform.position);
+				hit.collider.SendMessage(C.getOverHere, transform.position);
 			}
 		}
 	}

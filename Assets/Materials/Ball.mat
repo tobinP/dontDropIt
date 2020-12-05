@@ -50,6 +50,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - Boolean_50D90AD1: 0
+    - HighlightOn: 0
     - Vector1_41340E53: 1
     - _AlphaClip: 0
     - _Blend: 0
@@ -73,7 +74,7 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - Color_88DC6332: {r: 0.6509434, g: 0.61161673, b: 0.18729973, a: 0}
+    - Color_88DC6332: {r: 0, g: 0.5849056, b: 0.050466835, a: 0}
     - _BaseColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

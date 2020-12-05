@@ -5,16 +5,17 @@ using UnityEngine;
 // [RequireComponent(typeof(Rigidbody))]
 public class Pullable : MonoBehaviour
 {
-	public int force = 400;
+	public int pullForce = 400;
+	public int pushForce = 400;
 	private Rigidbody rbody;
-	private Renderer renderer1;
+	private Renderer ren;
 	private bool timerIsRunning;
 	private float timeRemaining = 0;
 
 	void Start()
 	{
 		rbody = GetComponent<Rigidbody>();
-		renderer1 = GetComponent<Renderer>();
+		ren = GetComponent<Renderer>();
 	}
 
 	void Update()
@@ -29,7 +30,7 @@ public class Pullable : MonoBehaviour
 			{
 				timeRemaining = 0;
 				timerIsRunning = false;
-				renderer1.material.SetFloat("HighlightOn", 0);
+				ren.material.SetFloat(C.highlightOn, 0);
 			}
 		}
 	}
@@ -40,12 +41,17 @@ public class Pullable : MonoBehaviour
 
 		timerIsRunning = true;
 		timeRemaining = 1;
-		renderer1.material.SetFloat("HighlightOn", 1);
+		ren.material.SetFloat(C.highlightOn, 1);
 	}
 
 	public void GetOverHere(Vector3 target)
 	{
 		var direction = target - transform.position;
-		rbody.AddForce(direction * force);
+		rbody.AddForce(direction * pullForce);
+	}
+
+	public void Push(Vector3 direction)
+	{
+		rbody.AddForce(direction * pushForce);
 	}
 }
