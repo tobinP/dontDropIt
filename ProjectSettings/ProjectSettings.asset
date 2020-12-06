@@ -68,7 +68,7 @@ PlayerSettings:
   androidBlitType: 0
   defaultIsNativeResolution: 1
   macRetinaSupport: 1
-  runInBackground: 1
+  runInBackground: 0
   captureSingleScreen: 0
   muteOtherAudioSources: 0
   Prepare IOS For Recording: 0
@@ -319,10 +319,9 @@ PlayerSettings:
   openGLRequireES31AEP: 0
   openGLRequireES32: 0
   m_TemplateCustomTags:
-    DESCRIPTION: Complete interactive 3D scene demo made in Unity and exported to
-      WebXR with the WebXR template of the Unity WebXR assets
-    META_TAGS: <meta name="color-scheme" content="normal" />
-    NAME: Sunny Desert
+    DESCRIPTION: 
+    META_TAGS: 
+    NAME: Don't Drop It
   mobileMTRendering:
     Android: 1
     iPhone: 1

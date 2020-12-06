@@ -8,8 +8,7 @@ using WebXR;
 public class ControllerInteraction : MonoBehaviour
 {
 	public int launchForce = 400;
-	private Rigidbody currentRigidBody;
-	private List<Rigidbody> contactRigidBodies = new List<Rigidbody>();
+	private Rigidbody ballRigidBody;
 	private Vector3 lastPosition;
 	private Quaternion lastRotation;
 	private FixedJoint attachJoint;
@@ -27,33 +26,35 @@ public class ControllerInteraction : MonoBehaviour
 
 	void Update()
 	{
-		if (currentRigidBody && controller.GetButtonDown(C.grip))
+		if (ballRigidBody && controller.GetButtonDown(C.grip))
 		{
+			ballRigidBody.AddForce(transform.forward.normalized * launchForce);
 			Drop();
-			currentRigidBody.AddForce(transform.forward.normalized * launchForce);
-			currentRigidBody = null;
+			return;
 		}
 
 		if (controller.GetButtonDown(C.trigger))
+		{
 			Pickup();
+			return;
+		}
 
 		if (controller.GetButtonUp(C.trigger))
 		{
 			Drop();
-			currentRigidBody = null;
+			return;
+		}
+			
+		if (controller.GetButtonDown(C.grip))
+		{
+			beam.on = true;
+			return;
 		}
 
-		if (beam != null)
+		if (controller.GetButtonUp(C.grip))
 		{
-			if (controller.GetButtonDown(C.grip))
-			{
-				beam.on = true;
-			}
-
-			if (controller.GetButtonUp(C.grip))
-			{
-				beam.PullObject();
-			}
+			beam.PullObject();
+			return;
 		}
 
 		// Use the controller button or axis position to manipulate the playback time for hand model.
@@ -63,76 +64,46 @@ public class ControllerInteraction : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		if (!currentRigidBody) return;
+		if (!ballRigidBody) return;
 
-		lastPosition = currentRigidBody.position;
-		lastRotation = currentRigidBody.rotation;
+		lastPosition = ballRigidBody.position;
+		lastRotation = ballRigidBody.rotation;
 	}
 
 	void OnTriggerEnter(Collider other)
 	{
-		if (!other.gameObject.CompareTag(C.interactable))
-			return;
-
-		contactRigidBodies.Add(other.attachedRigidbody);
-	}
-
-	void OnTriggerExit(Collider other)
-	{
-		if (!other.gameObject.CompareTag(C.interactable))
-			return;
-
-		contactRigidBodies.Remove(other.attachedRigidbody);
+		if (other.gameObject.CompareTag(C.interactable))
+		{
+			ballRigidBody = other.attachedRigidbody;
+		}
 	}
 
 	private void Pickup()
 	{
-		currentRigidBody = GetNearestRigidBody();
+		if (!ballRigidBody) return;
 
-		if (!currentRigidBody)
-			return;
+		ballRigidBody.SendMessage(C.caught);
+		ballRigidBody.MovePosition(transform.position);
+		attachJoint.connectedBody = ballRigidBody;
 
-		currentRigidBody.MovePosition(transform.position);
-		attachJoint.connectedBody = currentRigidBody;
-
-		lastPosition = currentRigidBody.position;
-		lastRotation = currentRigidBody.rotation;
+		lastPosition = ballRigidBody.position;
+		lastRotation = ballRigidBody.rotation;
 	}
 
 	private void Drop()
 	{
-		if (!currentRigidBody)
-			return;
+		if (!ballRigidBody) return;
 
 		attachJoint.connectedBody = null;
 
-		currentRigidBody.velocity = (currentRigidBody.position - lastPosition) / Time.deltaTime;
+		ballRigidBody.velocity = (ballRigidBody.position - lastPosition) / Time.deltaTime;
 
-		var deltaRotation = currentRigidBody.rotation * Quaternion.Inverse(lastRotation);
+		var deltaRotation = ballRigidBody.rotation * Quaternion.Inverse(lastRotation);
 		float angle;
 		Vector3 axis;
 		deltaRotation.ToAngleAxis(out angle, out axis);
 		angle *= Mathf.Deg2Rad;
-		currentRigidBody.angularVelocity = axis * angle / Time.deltaTime;
-	}
-
-	private Rigidbody GetNearestRigidBody()
-	{
-		Rigidbody nearestRigidBody = null;
-		float minDistance = float.MaxValue;
-		float distance;
-
-		foreach (Rigidbody contactBody in contactRigidBodies)
-		{
-			distance = (contactBody.transform.position - transform.position).sqrMagnitude;
-
-			if (distance < minDistance)
-			{
-				minDistance = distance;
-				nearestRigidBody = contactBody;
-			}
-		}
-
-		return nearestRigidBody;
+		ballRigidBody.angularVelocity = axis * angle / Time.deltaTime;
+		ballRigidBody = null;
 	}
 }
