@@ -19,7 +19,7 @@ public class Pullable : MonoBehaviour
 	{
 		rbody = GetComponent<Rigidbody>();
 		ren = GetComponent<Renderer>();
-		ren.material.SetColor("BaseColor", colors[0]);
+		ren.material.SetColor(C.baseColor, colors[0]);
 	}
 
 	void Update()
